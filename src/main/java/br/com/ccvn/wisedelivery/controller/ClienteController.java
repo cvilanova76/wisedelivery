@@ -1,13 +1,21 @@
 package br.com.ccvn.wisedelivery.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import br.com.ccvn.wisedelivery.dominio.Cliente;
+import br.com.ccvn.wisedelivery.controller.validator.Validator;
+import br.com.ccvn.wisedelivery.dominio.dto.clientedto.ClienteDTO;
+import br.com.ccvn.wisedelivery.dominio.dto.clientedto.ClienteLoginDTO;
+import br.com.ccvn.wisedelivery.exception.SenhaInvalidaException;
+import br.com.ccvn.wisedelivery.service.ClienteService;
+import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -15,16 +23,41 @@ import lombok.extern.log4j.Log4j2;
 @RequestMapping("clientes")
 public class ClienteController {
 
+    @Autowired
+    @Getter private ClienteService clienteService;
+
+    @Autowired
+    @Getter private Validator<ClienteDTO> validator;
+    
+    
     @GetMapping("form-cadastro")
     public String formCadastroCliente(Model model){
-        model.addAttribute("cliente", new Cliente());
+        model.addAttribute("cliente", new ClienteDTO());
         return "cliente-cadastro";
     } 
 
     @PostMapping("/save")
-    public String salvarCliente( @ModelAttribute("cliente") Cliente cliente){
-        log.info("CLIENTE SALVO: " + cliente.getNome());
-        return "cliente-cadastro";
+    public String salvarCliente ( @ModelAttribute("cliente") @Valid ClienteDTO cliente, BindingResult result){
+        if(validator.validator(cliente)){
+            log.error("Senha não confere", cliente);
+            throw new SenhaInvalidaException("Senha não confere");
+        }
+        getClienteService().salvar(cliente);
+        log.info(String.format("Cliente salvo. Nome: [%s]", cliente.getNome()));
+        return "cliente-cadastro-ok";
     }
     
+    @GetMapping("/login")
+    public String telaLogin(Model model){
+        model.addAttribute("cliente", new ClienteLoginDTO());
+        return "login";
+    }
+
+    @PostMapping("/logar")
+    public String login(@ModelAttribute("cliente") ClienteLoginDTO cliente){
+        if(!getClienteService().login(cliente)) {
+            return "login";
+        }
+        return "cliente-home";
+    }
 }
