@@ -26,9 +26,19 @@ public class RestauranteServiceImpl implements RestauranteService {
     @Getter
     private RestauranteCategoriaRepository restauranteCategoriaRepository;
 
+    @Autowired
+    @Getter
+    private ImageServiceImpl imageService;
+
     @Override
     public RestauranteSalvoDTO salvar(RestauranteDTO dto) {
-        return deRestauranteParaRestauranteSalvoDTO(getRestauranteRepository().save(deDtoParaRestaurante(dto)));
+        dto.setLogotipo(imageService.uploadImagem(dto.getArquivoLogotipo()));
+        return 
+            deRestauranteParaRestauranteSalvoDTO(
+                getRestauranteRepository().save(
+                    deDtoParaRestaurante(dto)
+                    )
+                    );
     }
 
     

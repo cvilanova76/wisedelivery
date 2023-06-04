@@ -9,7 +9,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import br.com.ccvn.wisedelivery.dominio.RestauranteCategoria;
 import br.com.ccvn.wisedelivery.repository.RestauranteCategoriaRepository;
+import br.com.ccvn.wisedelivery.service.impl.ImageServiceImpl;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 @SpringBootApplication
 public class WisedeliveryApplication implements CommandLineRunner {
 
@@ -41,7 +44,7 @@ public class WisedeliveryApplication implements CommandLineRunner {
 
 		restauranteCategoriaRepository.saveAll(List.of(cat1, cat2, cat3, cat4));
 		
-
+		log.info(ImageServiceImpl.criarPastaDeUpload());
 		
 	}
 
